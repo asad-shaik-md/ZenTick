@@ -78,6 +78,11 @@ class TimerState extends ChangeNotifier {
 
   void start() {
     if (_status == TimerStatus.initial || _status == TimerStatus.paused) {
+      // Stop stopwatch if it's running
+      if (_stopwatchStatus == StopwatchStatus.running) {
+        pauseStopwatch();
+      }
+      
       _status = TimerStatus.running;
       _startTimer();
       notifyListeners();
@@ -133,6 +138,11 @@ class TimerState extends ChangeNotifier {
   // Stopwatch methods
   void startStopwatch() {
     if (_stopwatchStatus == StopwatchStatus.initial || _stopwatchStatus == StopwatchStatus.paused) {
+      // Stop timer if it's running
+      if (_status == TimerStatus.running) {
+        pause();
+      }
+      
       _stopwatchStatus = StopwatchStatus.running;
       _startStopwatchTimer();
       notifyListeners();
