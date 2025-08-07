@@ -15,7 +15,7 @@ class FocusTimerView extends StatelessWidget {
           return Center(
             child: Container(
               width: 280,
-              height: 80,
+              height: 66,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.9),
@@ -23,7 +23,7 @@ class FocusTimerView extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Left side: Timer and progress bar
+                  // Left side: Timer only (no progress bar)
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -37,28 +37,6 @@ class FocusTimerView extends StatelessWidget {
                             fontWeight: FontWeight.w300,
                             color: Colors.white,
                             fontFeatures: [FontFeature.tabularFigures()],
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        // Minimal Progress Bar
-                        Container(
-                          width: 160,
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(1.5),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(1.5),
-                            child: LinearProgressIndicator(
-                              value: timerState.progress,
-                              backgroundColor: Colors.transparent,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                timerState.isFinished ? Colors.green : Colors.orange,
-                              ),
-                            ),
                           ),
                         ),
                       ],
