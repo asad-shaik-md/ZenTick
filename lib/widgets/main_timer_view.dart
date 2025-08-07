@@ -36,7 +36,9 @@ class _MainTimerViewState extends State<MainTimerView> {
             padding: const EdgeInsets.all(32.0),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - 64,
+                minHeight: MediaQuery.of(context).size.height > 64 
+                    ? MediaQuery.of(context).size.height - 64 
+                    : 400,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

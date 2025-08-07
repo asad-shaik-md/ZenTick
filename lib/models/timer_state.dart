@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../services/window_service.dart';
 
 enum TimerStatus { initial, running, paused, finished }
 
@@ -94,10 +95,16 @@ class TimerState extends ChangeNotifier {
     });
   }
 
-  void _finish() {
+  void _finish() async {
     _timer?.cancel();
     _status = TimerStatus.finished;
-    _isFocusMode = false;
+    
+    // Exit focus mode if we're in it
+    if (_isFocusMode) {
+      _isFocusMode = false;
+      await WindowService.exitFocusMode();
+    }
+    
     notifyListeners();
   }
 
