@@ -3,7 +3,7 @@ import 'package:window_manager/window_manager.dart';
 
 class WindowService {
   static const Size mainWindowSize = Size(400, 500);
-  static const Size focusWindowSize = Size(240, 120);
+  static const Size focusWindowSize = Size(300, 100);
   static const Offset focusWindowOffset = Offset(50, 50); // Bottom-left positioning
 
   static Future<void> initializeMainWindow() async {

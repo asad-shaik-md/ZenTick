@@ -11,6 +11,20 @@ class MainTimerView extends StatefulWidget {
 }
 
 class _MainTimerViewState extends State<MainTimerView> {
+  bool _isEditingTime = false;
+  final TextEditingController _minutesController = TextEditingController();
+  final TextEditingController _secondsController = TextEditingController();
+  final FocusNode _minutesFocus = FocusNode();
+  final FocusNode _secondsFocus = FocusNode();
+
+  @override
+  void dispose() {
+    _minutesController.dispose();
+    _secondsController.dispose();
+    _minutesFocus.dispose();
+    _secondsFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +89,7 @@ class _MainTimerViewState extends State<MainTimerView> {
     if (timerState.status == TimerStatus.initial) {
       // Editable timer display when not running
       return GestureDetector(
-        onTap: () => _showTimeEditDialog(timerState),
+        onTap: () => _startEditing(timerState),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           decoration: BoxDecoration(
@@ -89,30 +103,126 @@ class _MainTimerViewState extends State<MainTimerView> {
               ),
             ],
             border: Border.all(
-              color: Colors.blue.withValues(alpha: 0.3),
+              color: _isEditingTime ? Colors.orange.withValues(alpha: 0.6) : Colors.blue.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
           child: Column(
             children: [
-              Text(
-                timerState.formattedTime,
-                style: const TextStyle(
-                  fontSize: 64,
-                  fontWeight: FontWeight.w200,
-                  color: Colors.black87,
-                  fontFeatures: [FontFeature.tabularFigures()],
+              if (_isEditingTime) ...[
+                // Inline editing mode
+                SizedBox(
+                  width: 200, // Constrain the width
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Minutes input
+                      SizedBox(
+                        width: 70,
+                        child: TextField(
+                          controller: _minutesController,
+                          focusNode: _minutesFocus,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w200,
+                            color: Colors.black87,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '00',
+                          ),
+                          onSubmitted: (_) => _secondsFocus.requestFocus(),
+                        ),
+                      ),
+                      const Text(
+                        ':',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.w200,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      // Seconds input
+                      SizedBox(
+                        width: 70,
+                        child: TextField(
+                          controller: _secondsController,
+                          focusNode: _secondsFocus,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w200,
+                            color: Colors.black87,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: '00',
+                          ),
+                          onSubmitted: (_) => _finishEditing(timerState),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tap to edit time',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.blue[600],
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 70,
+                      height: 32,
+                      child: TextButton(
+                        onPressed: () => _cancelEditing(timerState),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 60,
+                      height: 32,
+                      child: ElevatedButton(
+                        onPressed: () => _finishEditing(timerState),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                        ),
+                        child: const Text(
+                          'Set',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ] else ...[
+                // Regular display mode
+                Text(
+                  timerState.formattedTime,
+                  style: const TextStyle(
+                    fontSize: 64,
+                    fontWeight: FontWeight.w200,
+                    color: Colors.black87,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Tap to edit time',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -165,77 +275,35 @@ class _MainTimerViewState extends State<MainTimerView> {
     );
   }
 
-  void _showTimeEditDialog(TimerState timerState) {
-    final TextEditingController minutesController = TextEditingController();
-    final TextEditingController secondsController = TextEditingController();
-    
-    // Pre-fill with current time
-    final currentMinutes = timerState.remainingTime ~/ 60;
-    final currentSeconds = timerState.remainingTime % 60;
-    minutesController.text = currentMinutes.toString();
-    secondsController.text = currentSeconds.toString();
+  void _startEditing(TimerState timerState) {
+    setState(() {
+      _isEditingTime = true;
+      final currentMinutes = timerState.remainingTime ~/ 60;
+      final currentSeconds = timerState.remainingTime % 60;
+      _minutesController.text = currentMinutes.toString().padLeft(2, '0');
+      _secondsController.text = currentSeconds.toString().padLeft(2, '0');
+    });
+    _minutesFocus.requestFocus();
+  }
 
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Set Timer'),
-          content: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Minutes input
-              SizedBox(
-                width: 60,
-                child: TextField(
-                  controller: minutesController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    labelText: 'Min',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Text(':', style: TextStyle(fontSize: 24)),
-              const SizedBox(width: 16),
-              // Seconds input
-              SizedBox(
-                width: 60,
-                child: TextField(
-                  controller: secondsController,
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: const InputDecoration(
-                    labelText: 'Sec',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final minutes = int.tryParse(minutesController.text) ?? 0;
-                final seconds = int.tryParse(secondsController.text) ?? 0;
-                final totalSeconds = (minutes * 60) + seconds;
-                
-                if (totalSeconds > 0 && totalSeconds <= 7200) { // Max 2 hours
-                  timerState.setCustomDuration(totalSeconds);
-                }
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('Set'),
-            ),
-          ],
-        );
-      },
-    );
+  void _finishEditing(TimerState timerState) {
+    final minutes = int.tryParse(_minutesController.text) ?? 0;
+    final seconds = int.tryParse(_secondsController.text) ?? 0;
+    final totalSeconds = (minutes * 60) + seconds;
+    
+    if (totalSeconds > 0 && totalSeconds <= 7200) { // Max 2 hours
+      timerState.setCustomDuration(totalSeconds);
+    }
+    
+    setState(() {
+      _isEditingTime = false;
+    });
+  }
+
+  void _cancelEditing(TimerState timerState) {
+    setState(() {
+      _isEditingTime = false;
+    });
   }
 
   Widget _buildControlButtons(BuildContext context, TimerState timerState) {
