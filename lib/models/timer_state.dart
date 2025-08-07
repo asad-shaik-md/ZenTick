@@ -13,6 +13,7 @@ class TimerState extends ChangeNotifier {
   TimerStatus _status = TimerStatus.initial;
   Timer? _timer;
   bool _isFocusMode = false;
+  bool _isInStopwatchMode = false; // Track which mode we're in
   
   // Stopwatch properties
   int _stopwatchTime = 0; // elapsed time in seconds
@@ -24,6 +25,7 @@ class TimerState extends ChangeNotifier {
   int get remainingTime => _remainingTime;
   TimerStatus get status => _status;
   bool get isFocusMode => _isFocusMode;
+  bool get isInStopwatchMode => _isInStopwatchMode;
   bool get isRunning => _status == TimerStatus.running;
   bool get isPaused => _status == TimerStatus.paused;
   bool get isFinished => _status == TimerStatus.finished;
@@ -93,6 +95,7 @@ class TimerState extends ChangeNotifier {
     _status = TimerStatus.initial;
     _remainingTime = _duration;
     _isFocusMode = false;
+    _isInStopwatchMode = false;
     notifyListeners();
   }
 
@@ -103,8 +106,17 @@ class TimerState extends ChangeNotifier {
     }
   }
 
+  void enterFocusMode(bool isStopwatchMode) {
+    if (_status == TimerStatus.running || _stopwatchStatus == StopwatchStatus.running) {
+      _isFocusMode = true;
+      _isInStopwatchMode = isStopwatchMode;
+      notifyListeners();
+    }
+  }
+
   void exitFocusMode() {
     _isFocusMode = false;
+    _isInStopwatchMode = false;
     notifyListeners();
   }
 
@@ -130,6 +142,7 @@ class TimerState extends ChangeNotifier {
     _stopwatchStatus = StopwatchStatus.initial;
     _stopwatchTime = 0;
     _isFocusMode = false;
+    _isInStopwatchMode = false;
     notifyListeners();
   }
 

@@ -31,7 +31,7 @@ class FocusTimerView extends StatelessWidget {
                       children: [
                         // Compact Timer/Stopwatch Display
                         Text(
-                          timerState.isFocusMode && timerState.isStopwatchRunning 
+                          timerState.isInStopwatchMode
                               ? timerState.stopwatchFormattedTime 
                               : timerState.formattedTime,
                           style: const TextStyle(
@@ -52,14 +52,20 @@ class FocusTimerView extends StatelessWidget {
                       // Pause/Resume button
                       GestureDetector(
                         onTap: () {
-                          if (timerState.isStopwatchRunning) {
-                            timerState.pauseStopwatch();
-                          } else if (timerState.isStopwatchPaused) {
-                            timerState.startStopwatch();
-                          } else if (timerState.isRunning) {
-                            timerState.pause();
-                          } else if (timerState.isPaused) {
-                            timerState.start();
+                          if (timerState.isInStopwatchMode) {
+                            // Stopwatch mode
+                            if (timerState.isStopwatchRunning) {
+                              timerState.pauseStopwatch();
+                            } else if (timerState.isStopwatchPaused) {
+                              timerState.startStopwatch();
+                            }
+                          } else {
+                            // Timer mode
+                            if (timerState.isRunning) {
+                              timerState.pause();
+                            } else if (timerState.isPaused) {
+                              timerState.start();
+                            }
                           }
                         },
                         child: Container(
@@ -73,7 +79,9 @@ class FocusTimerView extends StatelessWidget {
                             ),
                           ),
                           child: Icon(
-                            (timerState.isRunning || timerState.isStopwatchRunning) ? Icons.pause : Icons.play_arrow,
+                            (timerState.isInStopwatchMode ? timerState.isStopwatchRunning : timerState.isRunning) 
+                                ? Icons.pause 
+                                : Icons.play_arrow,
                             color: Colors.white,
                             size: 16,
                           ),

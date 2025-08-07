@@ -470,7 +470,7 @@ class _MainTimerViewState extends State<MainTimerView> with SingleTickerProvider
       height: 45,
       child: ElevatedButton.icon(
         onPressed: () async {
-          timerState.toggleFocusMode();
+          timerState.enterFocusMode(false); // false = timer mode
           await WindowService.setupFocusMode();
         },
         icon: const Icon(Icons.center_focus_strong),
@@ -522,7 +522,7 @@ class _MainTimerViewState extends State<MainTimerView> with SingleTickerProvider
       height: 45,
       child: ElevatedButton.icon(
         onPressed: () async {
-          timerState.toggleFocusMode();
+          timerState.enterFocusMode(true); // true = stopwatch mode
           await WindowService.setupFocusMode();
         },
         icon: const Icon(Icons.center_focus_strong),
