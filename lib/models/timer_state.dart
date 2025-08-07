@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../services/window_service.dart';
 
 enum TimerStatus { initial, running, paused, finished }
+enum StopwatchStatus { initial, running, paused }
 
 class TimerState extends ChangeNotifier {
   static const int defaultDuration = 25 * 60; // 25 minutes in seconds
@@ -12,6 +13,11 @@ class TimerState extends ChangeNotifier {
   TimerStatus _status = TimerStatus.initial;
   Timer? _timer;
   bool _isFocusMode = false;
+  
+  // Stopwatch properties
+  int _stopwatchTime = 0; // elapsed time in seconds
+  StopwatchStatus _stopwatchStatus = StopwatchStatus.initial;
+  Timer? _stopwatchTimer;
 
   // Getters
   int get duration => _duration;
@@ -23,11 +29,24 @@ class TimerState extends ChangeNotifier {
   bool get isFinished => _status == TimerStatus.finished;
   bool get canStart => _status == TimerStatus.initial || _status == TimerStatus.paused;
   bool get canFocus => _status == TimerStatus.running;
+  
+  // Stopwatch getters
+  int get stopwatchTime => _stopwatchTime;
+  StopwatchStatus get stopwatchStatus => _stopwatchStatus;
+  bool get isStopwatchRunning => _stopwatchStatus == StopwatchStatus.running;
+  bool get isStopwatchPaused => _stopwatchStatus == StopwatchStatus.paused;
 
   // Formatted time display
   String get formattedTime {
     final minutes = _remainingTime ~/ 60;
     final seconds = _remainingTime % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+  
+  // Stopwatch formatted time display
+  String get stopwatchFormattedTime {
+    final minutes = _stopwatchTime ~/ 60;
+    final seconds = _stopwatchTime % 60;
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
@@ -78,10 +97,35 @@ class TimerState extends ChangeNotifier {
   }
 
   void toggleFocusMode() {
-    if (_status == TimerStatus.running) {
+    if (_status == TimerStatus.running || _stopwatchStatus == StopwatchStatus.running) {
       _isFocusMode = !_isFocusMode;
       notifyListeners();
     }
+  }
+
+  // Stopwatch methods
+  void startStopwatch() {
+    if (_stopwatchStatus == StopwatchStatus.initial || _stopwatchStatus == StopwatchStatus.paused) {
+      _stopwatchStatus = StopwatchStatus.running;
+      _startStopwatchTimer();
+      notifyListeners();
+    }
+  }
+
+  void pauseStopwatch() {
+    if (_stopwatchStatus == StopwatchStatus.running) {
+      _stopwatchStatus = StopwatchStatus.paused;
+      _stopwatchTimer?.cancel();
+      notifyListeners();
+    }
+  }
+
+  void resetStopwatch() {
+    _stopwatchTimer?.cancel();
+    _stopwatchStatus = StopwatchStatus.initial;
+    _stopwatchTime = 0;
+    _isFocusMode = false;
+    notifyListeners();
   }
 
   void _startTimer() {
@@ -92,6 +136,13 @@ class TimerState extends ChangeNotifier {
       } else {
         _finish();
       }
+    });
+  }
+
+  void _startStopwatchTimer() {
+    _stopwatchTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _stopwatchTime++;
+      notifyListeners();
     });
   }
 
@@ -111,6 +162,7 @@ class TimerState extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    _stopwatchTimer?.cancel();
     super.dispose();
   }
 }

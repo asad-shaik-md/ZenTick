@@ -10,12 +10,20 @@ class MainTimerView extends StatefulWidget {
   State<MainTimerView> createState() => _MainTimerViewState();
 }
 
-class _MainTimerViewState extends State<MainTimerView> {
+class _MainTimerViewState extends State<MainTimerView> with SingleTickerProviderStateMixin {
   bool _isEditingTime = false;
   final TextEditingController _minutesController = TextEditingController();
   final TextEditingController _secondsController = TextEditingController();
   final FocusNode _minutesFocus = FocusNode();
   final FocusNode _secondsFocus = FocusNode();
+  
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
 
   @override
   void dispose() {
@@ -23,6 +31,7 @@ class _MainTimerViewState extends State<MainTimerView> {
     _secondsController.dispose();
     _minutesFocus.dispose();
     _secondsFocus.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -54,36 +63,132 @@ class _MainTimerViewState extends State<MainTimerView> {
                       letterSpacing: 2.0,
                     ),
                   ),
-                  const SizedBox(height: 40),
-                  
-                  // Timer Display
-                  _buildTimerDisplay(timerState),
                   const SizedBox(height: 30),
                   
-                  // Progress Bar
-                  _buildProgressBar(timerState),
-                  const SizedBox(height: 40),
-                  
-                  // Duration Selector (only when not running) - Now just empty space
-                  if (timerState.status == TimerStatus.initial)
-                    const SizedBox(height: 0),
-                  
+                  // Tab Bar
+                  Container(
+                    width: 300,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: TabBar(
+                      controller: _tabController,
+                      indicator: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      labelColor: Colors.black87,
+                      unselectedLabelColor: Colors.black54,
+                      labelStyle: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                      tabs: const [
+                        Tab(text: 'Timer'),
+                        Tab(text: 'Stopwatch'),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 30),
                   
-                  // Control Buttons
-                  _buildControlButtons(context, timerState),
-                  
-                  // Focus Button (only when running)
-                  if (timerState.canFocus) ...[
-                    const SizedBox(height: 20),
-                    _buildFocusButton(context, timerState),
-                  ],
+                  // Tab View Content
+                  SizedBox(
+                    height: 400,
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // Timer Tab
+                        _buildTimerTab(timerState),
+                        // Stopwatch Tab
+                        _buildStopwatchTab(timerState),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildTimerTab(TimerState timerState) {
+    return Column(
+      children: [
+        // Timer Display
+        _buildTimerDisplay(timerState),
+        const SizedBox(height: 30),
+        
+        // Progress Bar
+        _buildProgressBar(timerState),
+        const SizedBox(height: 40),
+        
+        // Control Buttons
+        _buildControlButtons(context, timerState),
+        
+        // Focus Button (only when running)
+        if (timerState.canFocus) ...[
+          const SizedBox(height: 20),
+          _buildFocusButton(context, timerState),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStopwatchTab(TimerState timerState) {
+    return Column(
+      children: [
+        // Stopwatch Display
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Text(
+            timerState.stopwatchFormattedTime,
+            style: const TextStyle(
+              fontSize: 64,
+              fontWeight: FontWeight.w200,
+              color: Colors.black87,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+        
+        const SizedBox(height: 40),
+        
+        // Stopwatch Control Buttons
+        _buildStopwatchButtons(context, timerState),
+        
+        // Focus Button (only when running)
+        if (timerState.isStopwatchRunning) ...[
+          const SizedBox(height: 20),
+          _buildStopwatchFocusButton(context, timerState),
+        ],
+      ],
     );
   }
 
@@ -360,6 +465,58 @@ class _MainTimerViewState extends State<MainTimerView> {
   }
 
   Widget _buildFocusButton(BuildContext context, TimerState timerState) {
+    return SizedBox(
+      width: 200,
+      height: 45,
+      child: ElevatedButton.icon(
+        onPressed: () async {
+          timerState.toggleFocusMode();
+          await WindowService.setupFocusMode();
+        },
+        icon: const Icon(Icons.center_focus_strong),
+        label: const Text('Enter Focus Mode'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStopwatchButtons(BuildContext context, TimerState timerState) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Start/Pause Button
+        _buildControlButton(
+          onPressed: timerState.stopwatchStatus == StopwatchStatus.initial || timerState.isStopwatchPaused
+              ? timerState.startStopwatch
+              : timerState.isStopwatchRunning
+                  ? timerState.pauseStopwatch
+                  : null,
+          icon: timerState.isStopwatchRunning ? Icons.pause : Icons.play_arrow,
+          label: timerState.isStopwatchRunning ? 'Pause' : 'Start',
+          isPrimary: true,
+        ),
+        
+        const SizedBox(width: 20),
+        
+        // Reset Button
+        _buildControlButton(
+          onPressed: timerState.stopwatchStatus != StopwatchStatus.initial ? timerState.resetStopwatch : null,
+          icon: Icons.refresh,
+          label: 'Reset',
+          isPrimary: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStopwatchFocusButton(BuildContext context, TimerState timerState) {
     return SizedBox(
       width: 200,
       height: 45,

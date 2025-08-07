@@ -29,9 +29,11 @@ class FocusTimerView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Compact Timer Display
+                        // Compact Timer/Stopwatch Display
                         Text(
-                          timerState.formattedTime,
+                          timerState.isFocusMode && timerState.isStopwatchRunning 
+                              ? timerState.stopwatchFormattedTime 
+                              : timerState.formattedTime,
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w300,
@@ -50,7 +52,11 @@ class FocusTimerView extends StatelessWidget {
                       // Pause/Resume button
                       GestureDetector(
                         onTap: () {
-                          if (timerState.isRunning) {
+                          if (timerState.isStopwatchRunning) {
+                            timerState.pauseStopwatch();
+                          } else if (timerState.isStopwatchPaused) {
+                            timerState.startStopwatch();
+                          } else if (timerState.isRunning) {
                             timerState.pause();
                           } else if (timerState.isPaused) {
                             timerState.start();
@@ -67,7 +73,7 @@ class FocusTimerView extends StatelessWidget {
                             ),
                           ),
                           child: Icon(
-                            timerState.isRunning ? Icons.pause : Icons.play_arrow,
+                            (timerState.isRunning || timerState.isStopwatchRunning) ? Icons.pause : Icons.play_arrow,
                             color: Colors.white,
                             size: 16,
                           ),
