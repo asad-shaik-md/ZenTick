@@ -103,6 +103,11 @@ class TimerState extends ChangeNotifier {
     }
   }
 
+  void exitFocusMode() {
+    _isFocusMode = false;
+    notifyListeners();
+  }
+
   // Stopwatch methods
   void startStopwatch() {
     if (_stopwatchStatus == StopwatchStatus.initial || _stopwatchStatus == StopwatchStatus.paused) {

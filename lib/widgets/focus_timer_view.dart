@@ -85,7 +85,7 @@ class FocusTimerView extends StatelessWidget {
                       // Exit Focus Mode Button
                       GestureDetector(
                         onTap: () async {
-                          timerState.toggleFocusMode();
+                          timerState.exitFocusMode();
                           await WindowService.exitFocusMode();
                         },
                         child: Container(
