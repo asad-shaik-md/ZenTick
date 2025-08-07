@@ -95,6 +95,18 @@ class _ZenTickHomeState extends State<ZenTickHome> with WindowListener {
               },
               child: const Text('Start New Session'),
             ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final timerState = Provider.of<TimerState>(context, listen: false);
+                timerState.reset(); // Reset timer first
+                timerState.resetStopwatch(); // Reset stopwatch to 0
+                timerState.startStopwatch(); // Start stopwatch
+                timerState.enterFocusMode(true); // Enter focus mode for stopwatch
+                await WindowService.setupFocusMode(); // Transform window to sticky mode
+              },
+              child: const Text('Start Stopwatch'),
+            ),
           ],
         );
       },
