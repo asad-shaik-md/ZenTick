@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run ZenTick App",
+			"type": "shell",
+			"command": "flutter",
+			"args": [
+				"run",
+				"-d",
+				"macos"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Build ZenTick App (Debug)",
+			"type": "shell",
+			"command": "flutter",
+			"args": ["build", "macos", "--debug"],
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Build ZenTick App (Release)",
+			"type": "shell",
+			"command": "flutter",
+			"args": ["build", "macos", "--release"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Clean Flutter Project",
+			"type": "shell",
+			"command": "flutter",
+			"args": ["clean"],
+			"group": "build",
+			"problemMatcher": []
+		},
+		{
+			"label": "Flutter Test",
+			"type": "shell",
+			"command": "flutter",
+			"args": ["test"],
+			"group": "test",
+			"problemMatcher": []
+		}
+	]
+}
