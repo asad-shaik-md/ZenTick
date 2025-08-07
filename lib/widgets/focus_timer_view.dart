@@ -14,37 +14,37 @@ class FocusTimerView extends StatelessWidget {
         builder: (context, timerState, child) {
           return Center(
             child: Container(
-              padding: const EdgeInsets.all(16),
+              width: 220,
+              height: 100,
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // Compact Timer Display
                   Text(
                     timerState.formattedTime,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.w300,
                       color: Colors.white,
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),
                   
-                  const SizedBox(height: 8),
-                  
                   // Minimal Progress Bar
                   Container(
-                    width: 140,
-                    height: 3,
+                    width: 160,
+                    height: 2,
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(1.5),
+                      borderRadius: BorderRadius.circular(1),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(1.5),
+                      borderRadius: BorderRadius.circular(1),
                       child: LinearProgressIndicator(
                         value: timerState.progress,
                         backgroundColor: Colors.transparent,
@@ -55,11 +55,9 @@ class FocusTimerView extends StatelessWidget {
                     ),
                   ),
                   
-                  const SizedBox(height: 12),
-                  
                   // Control buttons row
                   Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // Pause/Resume button
                       GestureDetector(
@@ -71,10 +69,10 @@ class FocusTimerView extends StatelessWidget {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: Colors.white.withValues(alpha: 0.3),
                               width: 1,
@@ -83,12 +81,10 @@ class FocusTimerView extends StatelessWidget {
                           child: Icon(
                             timerState.isRunning ? Icons.pause : Icons.play_arrow,
                             color: Colors.white,
-                            size: 16,
+                            size: 14,
                           ),
                         ),
                       ),
-                      
-                      const SizedBox(width: 8),
                       
                       // Exit Focus Mode Button
                       GestureDetector(
@@ -97,10 +93,10 @@ class FocusTimerView extends StatelessWidget {
                           await WindowService.exitFocusMode();
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: Colors.white.withValues(alpha: 0.3),
                               width: 1,
@@ -109,7 +105,7 @@ class FocusTimerView extends StatelessWidget {
                           child: const Icon(
                             Icons.close,
                             color: Colors.white,
-                            size: 16,
+                            size: 14,
                           ),
                         ),
                       ),
