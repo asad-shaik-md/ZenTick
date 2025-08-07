@@ -14,6 +14,7 @@ class TimerState extends ChangeNotifier {
   Timer? _timer;
   bool _isFocusMode = false;
   bool _isInStopwatchMode = false; // Track which mode we're in
+  bool _shouldReturnToStopwatchTab = false; // Track which tab to return to
   
   // Stopwatch properties
   int _stopwatchTime = 0; // elapsed time in seconds
@@ -26,6 +27,7 @@ class TimerState extends ChangeNotifier {
   TimerStatus get status => _status;
   bool get isFocusMode => _isFocusMode;
   bool get isInStopwatchMode => _isInStopwatchMode;
+  bool get shouldReturnToStopwatchTab => _shouldReturnToStopwatchTab;
   bool get isRunning => _status == TimerStatus.running;
   bool get isPaused => _status == TimerStatus.paused;
   bool get isFinished => _status == TimerStatus.finished;
@@ -96,6 +98,7 @@ class TimerState extends ChangeNotifier {
     _remainingTime = _duration;
     _isFocusMode = false;
     _isInStopwatchMode = false;
+    _shouldReturnToStopwatchTab = false;
     notifyListeners();
   }
 
@@ -110,6 +113,7 @@ class TimerState extends ChangeNotifier {
     if (_status == TimerStatus.running || _stopwatchStatus == StopwatchStatus.running) {
       _isFocusMode = true;
       _isInStopwatchMode = isStopwatchMode;
+      _shouldReturnToStopwatchTab = isStopwatchMode;
       notifyListeners();
     }
   }
@@ -117,6 +121,12 @@ class TimerState extends ChangeNotifier {
   void exitFocusMode() {
     _isFocusMode = false;
     _isInStopwatchMode = false;
+    // Don't reset _shouldReturnToStopwatchTab here, let the UI consume it
+    notifyListeners();
+  }
+
+  void clearTabReturnFlag() {
+    _shouldReturnToStopwatchTab = false;
     notifyListeners();
   }
 
@@ -143,6 +153,7 @@ class TimerState extends ChangeNotifier {
     _stopwatchTime = 0;
     _isFocusMode = false;
     _isInStopwatchMode = false;
+    _shouldReturnToStopwatchTab = false;
     notifyListeners();
   }
 

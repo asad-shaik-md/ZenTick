@@ -41,6 +41,16 @@ class _MainTimerViewState extends State<MainTimerView> with SingleTickerProvider
       backgroundColor: Colors.grey[50],
       body: Consumer<TimerState>(
         builder: (context, timerState, child) {
+          // Handle tab switching when exiting focus mode
+          if (timerState.shouldReturnToStopwatchTab && !timerState.isFocusMode) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_tabController.index != 1) {
+                _tabController.animateTo(1); // Switch to stopwatch tab
+              }
+              timerState.clearTabReturnFlag();
+            });
+          }
+          
           return SingleChildScrollView(
             padding: const EdgeInsets.all(32.0),
             child: ConstrainedBox(
@@ -470,6 +480,7 @@ class _MainTimerViewState extends State<MainTimerView> with SingleTickerProvider
       height: 45,
       child: ElevatedButton.icon(
         onPressed: () async {
+          // Remember current tab and enter focus mode
           timerState.enterFocusMode(false); // false = timer mode
           await WindowService.setupFocusMode();
         },
@@ -522,6 +533,7 @@ class _MainTimerViewState extends State<MainTimerView> with SingleTickerProvider
       height: 45,
       child: ElevatedButton.icon(
         onPressed: () async {
+          // Remember current tab and enter focus mode
           timerState.enterFocusMode(true); // true = stopwatch mode
           await WindowService.setupFocusMode();
         },
