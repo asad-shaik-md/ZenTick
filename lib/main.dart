@@ -95,13 +95,6 @@ class _ZenTickHomeState extends State<ZenTickHome> with WindowListener {
               },
               child: const Text('Start New Session'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Provider.of<TimerState>(context, listen: false).reset();
-              },
-              child: const Text('OK'),
-            ),
           ],
         );
       },
